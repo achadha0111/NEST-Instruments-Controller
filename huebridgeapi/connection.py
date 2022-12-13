@@ -37,6 +37,7 @@ class HueBridgeConnection:
 
     def display_parameters_form(self):
         with st.form("Connection_Parameters"):
+            title = st.title("Light Control")
             light_brightness = st.select_slider("Set Brightness", options=range(0, 255, 1), value=[0, 254])
             light_ct = st.select_slider("Set Temperature", options=range(153, 455, 1), value=[153, 454])
 
