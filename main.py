@@ -20,7 +20,7 @@ with bridge_column:
     bridge_form.title("Bridge Connect")
     hue_bridge_address = bridge_form.text_input("Enter IP address of Hue Bridge")
     connect_button = bridge_form.form_submit_button("Connect")
-    bridge_connection = hbc.HueBridgeConnection(hue_bridge_address, "")
+    bridge_connection = hbc.HueBridgeConnection(hue_bridge_address)
     if connect_button:
         bridge_connection.establish_connection()
 with light_column:
