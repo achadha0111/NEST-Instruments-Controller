@@ -40,7 +40,7 @@ class HueBridgeConnection:
             st.title("Light Control")
             trigger_button = st.form_submit_button("Set Light State")
             light_brightness = st.select_slider("Set Brightness", options=range(0, 255, 1), value=[0, 254])
-            light_ct = st.select_slider("Set Temperature", options=range(2200, 6500, 1), value=[2200, 6500])
+            light_ct = st.select_slider("Set Temperature", options=range(2200, 6501, 1), value=[2200, 6500])
             light_off_button = st.form_submit_button("Turn Light Off")
             if trigger_button:
                 self.set_light_parameters(light_brightness, light_ct)
