@@ -40,7 +40,7 @@ class HueBridgeConnection:
             st.title("Light Control")
             trigger_button = st.form_submit_button("Set Light State")
             light_brightness = st.select_slider("Set Brightness", options=range(0, 255, 1), value=[0, 254])
-            light_ct = st.select_slider("Set Temperature", options=range(153, 455, 1), value=[153, 454])
+            light_ct = st.select_slider("Set Temperature", options=range(2200, 6500, 1), value=[2200, 6500])
             light_off_button = st.form_submit_button("Turn Light Off")
             if trigger_button:
                 self.set_light_parameters(light_brightness, light_ct)
@@ -50,7 +50,7 @@ class HueBridgeConnection:
 
     def set_light_parameters(self, bri, ct):
         request_url = self.base_url + f"/{st.session_state['current_user']}/lights/1/state"
-        requests.put(request_url, json={"on": True, "ct": ct[1], "bri": bri[1]})
+        requests.put(request_url, json={"on": True, "ct": ct[1]/14.31, "bri": bri[1]})
 
     def turnoff_light(self):
         requests.put(self.base_url + f"/{st.session_state['current_user']}/lights/1/state", json={"on": False})

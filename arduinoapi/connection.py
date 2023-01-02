@@ -12,7 +12,7 @@ class ArduinoConnection:
 
     def display_blink_form(self):
         st.title("Shutter Control")
-        st.warning("Currently, blinks received by arduino are N-1. Needs to be investigated!", icon="⚠️")
+        # st.warning("Currently, blinks received by arduino are N-1. Needs to be investigated!", icon="⚠️")
         num_blinks = st.number_input("Select number of blinks", min_value=1, max_value=100, step=1)
         uniform = st.checkbox("Uniform (duration and interval for first blink is uniformly applied)")
         arduino_port = st.text_input("Enter arduino port name")
@@ -50,12 +50,14 @@ class ArduinoConnection:
         device = serial.Serial(port, baudrate=115200)
         time.sleep(1)
         progress_bar = st.progress(0)
+        blink_duration.append(100)
+        post_blink_intervals.append(1000)
         for blink in range(blinks):
             device.write(b'H')
             time.sleep(blink_duration[blink]/1000)
             device.write(b'L')
             time.sleep(post_blink_intervals[blink]/1000)
-            progress_bar.progress(blink/(blinks-1))
+            progress_bar.progress(blink/(blinks))
 
     def save_test_parameters(self, durations, intervals):
         df = pd.DataFrame({"blink_length": durations, "interval": intervals})
