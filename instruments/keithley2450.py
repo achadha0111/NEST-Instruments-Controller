@@ -44,15 +44,14 @@ def execute_measurement(sample, sweep, averages, min_current, max_current, magne
     st.line_chart(data, x="Current (A)", y="Voltage (V)")
 
 
-
 def display_controls():
     st.title("Keithley 2450")
 
-    default_sample_name = f"Sample {datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
+    default_sample_name = f"Sample {datetime.datetime.now().strftime('%d/%m/%Y')}"
     measurement_setup = st.form("Setup Instrument")
     instrument_port = measurement_setup.text_input("Instrument Connection Port",
                                                    value="USB0::0x05E6::0x2450::04365678::INSTR")
-    sample_name = measurement_setup.text_input("Sample Name", value=default_sample_name)
+    sample_name = measurement_setup.text_input("Sample Name", placeholder=default_sample_name)
     sweep = measurement_setup.number_input("Sweep Steps", min_value=1, max_value=100)
     averages = measurement_setup.number_input("Averages (number of readings per step)",
                                               value=10, min_value=1, max_value=100)
