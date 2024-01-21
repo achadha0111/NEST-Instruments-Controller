@@ -3,7 +3,8 @@ import pandas as pd
 import streamlit as st
 import serial
 import time
-
+import json
+from sys import getsizeof
 
 class ArduinoConnection:
     def __init__(self):
@@ -19,7 +20,7 @@ class ArduinoConnection:
         duration_col, interval_col = st.columns(2)
         with duration_col:
             blink_durations = [st.number_input(f"Blink {i+1} "
-                                               f"Duration (ms)", min_value=0, max_value=1000, key=f"{i}_duration") for i in
+                                               f"Duration (ms)", min_value=0, max_value=4000, key=f"{i}_duration") for i in
                                range(num_blinks)]
             setup_arduino_button = st.button("Setup Shutter")
         with interval_col:
@@ -39,28 +40,38 @@ class ArduinoConnection:
 
         if setup_arduino_button:
             st.write(f"Blink durations: {blink_durations}")
-            self.setup_arduino(blink_durations, post_blink_intervals, arduino_port)
-            self.save_test_parameters(blink_durations, post_blink_intervals)
+            arduino_timestamps = self.setup_arduino(blink_durations, post_blink_intervals, arduino_port)
+            self.save_test_parameters(blink_durations, post_blink_intervals, arduino_timestamps)
 
     # def update_square_wave_preview(self, blink_durations, post_blink_intervals):
     #     chart_data = pd.DataFrame(columns=["Time", "Signal"])
     #     st.line_chart(chart_data)
     def setup_arduino(self, blink_duration, post_blink_intervals, port):
         blinks = len(blink_duration)
-        device = serial.Serial(port, baudrate=115200)
-        time.sleep(1)
-        progress_bar = st.progress(0)
-        blink_duration.append(100)
-        post_blink_intervals.append(1000)
-        for blink in range(blinks):
-            device.write(b'H')
-            time.sleep(blink_duration[blink]/1000)
-            device.write(b'L')
-            time.sleep(post_blink_intervals[blink]/1000)
-            progress_bar.progress(blink/(blinks))
+        device = serial.Serial(port, baudrate=9600, timeout=2.5)
+        time.sleep(10)
+        blink_data = json.dumps({
+            "blink_duration": blink_duration,
+            "post_blink_interval": post_blink_intervals,
+            "blink": blinks,
+        })
 
-    def save_test_parameters(self, durations, intervals):
-        df = pd.DataFrame({"blink_length": durations, "interval": intervals})
+        with st.spinner("Blinking"): 
+            transmit_data = blink_data.encode("ascii")
+            device.write(transmit_data)
+            st.write("Transmitted data size {0} bytes".format(getsizeof(transmit_data)))
+
+            while True:
+                data = device.readline().decode("utf-8").strip()
+                time.sleep(0.1)
+                if data:
+                    timestamp_array = json.loads(data).get("data")
+                    st.write(timestamp_array)
+                    return timestamp_array
+        
+    def save_test_parameters(self, durations, intervals, ts):
+        data_dict = {"blink_length": durations, "interval": intervals, "arTimestamp": ts}
+        df = pd.DataFrame(dict([(key, pd.Series(value)) for key, value in data_dict.items()]))
         file_name = "Blink Parameters_"+ (datetime.datetime.now()).strftime("%m-%d-%Y, %H:%M:%S")
         df.to_csv(f"{file_name}.csv")
 
